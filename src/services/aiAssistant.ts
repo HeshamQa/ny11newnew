@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || "" });
 
 export async function getAiHealthAdvice(userPrompt: string, history: any[] = []) {
   try {
