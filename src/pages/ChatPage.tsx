@@ -93,20 +93,23 @@ export default function ChatPage({ user }: { user: UserProfile }) {
   };
 
   const sendQuote = async () => {
-    const amount = prompt("أدخل قيمة عرض السعر (ريال):");
+    const amount = prompt("أدخل قيمة عرض السعر:");
     if (!amount || isNaN(parseFloat(amount))) return;
+    
+    const currency = prompt("أدخل العملة (JOD/USD):")?.toUpperCase() === "USD" ? "USD" : "JOD";
     
     if (!id || !room) return;
 
     const baseAmount = parseFloat(amount);
-    const quoteMsg = `تم إرسال عرض سعر بقيمة ${formatPrice(baseAmount, user)}.`;
+    const quoteMsg = `تم إرسال عرض سعر بقيمة ${formatPrice(baseAmount, user, currency as any)}.`;
     
     await addDoc(collection(db, "chats", id, "messages"), {
       senderId: user.uid,
       text: quoteMsg,
       timestamp: Date.now(),
       type: "QUOTE",
-      quoteAmount: baseAmount
+      quoteAmount: baseAmount,
+      quoteCurrency: currency
     });
 
     await updateDoc(doc(db, "chats", id), {
@@ -195,7 +198,7 @@ export default function ChatPage({ user }: { user: UserProfile }) {
                 {m.type === "QUOTE" ? (
                     <div className="space-y-3">
                         <p className="font-bold flex items-center gap-2"><DollarSign size={14}/> عرض سعر مخصص</p>
-                        <p className="text-xl font-black">{formatPrice(m.quoteAmount || 0, user)}</p>
+                        <p className="text-xl font-black">{formatPrice(m.quoteAmount || 0, user, (m as any).quoteCurrency)}</p>
                         {m.senderId !== user.uid && (
                             <button 
                                 onClick={() => acceptQuote(m.id, m.quoteAmount || 0)}

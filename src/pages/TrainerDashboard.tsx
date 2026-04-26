@@ -20,24 +20,23 @@ export default function TrainerDashboard({ user }: { user: UserProfile }) {
 
       const q = query(
         collection(db, "chats"),
-        where("expertId", "==", user.uid),
-        orderBy("updatedAt", "desc")
+        where("expertId", "==", user.uid)
       );
       const snap = await getDocs(q);
       
       const chatData = await Promise.all(snap.docs.map(async d => {
-          const data = d.data();
+          const data = d.data() as ChatRoom;
           const userId = data.participants.find((p: string) => p !== user.uid);
           const userSnap = await getDoc(doc(db, "users", userId!));
           return { 
-              id: d.id, 
               ...data, 
+              id: d.id, 
               userName: userSnap.exists() ? userSnap.data().name : "Unknown User",
               userImg: userSnap.exists() ? userSnap.data().profilePic : null
           };
       }));
       
-      setActiveChats(chatData);
+      setActiveChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
       setLoading(false);
     };
     fetch();

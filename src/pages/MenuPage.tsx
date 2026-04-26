@@ -1,21 +1,24 @@
 import { useState, useEffect } from "react";
 import { collection, getDocs, addDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { FoodItem, UserProfile } from "../types";
+import { MenuItem, UserProfile } from "../types";
 import { formatPrice } from "../lib/currency";
 import { motion } from "motion/react";
-import { Search, Filter, ShoppingCart, Info, Activity, Zap } from "lucide-react";
+import { Search, Filter, ShoppingBag, Info, Activity, Zap, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 export default function MenuPage({ user }: { user?: UserProfile | null }) {
-  const [items, setItems] = useState<FoodItem[]>([]);
+  const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("الكل");
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchItems = async () => {
       const snap = await getDocs(collection(db, "menu"));
-      setItems(snap.docs.map(d => ({ id: d.id, ...d.data() } as FoodItem)));
+      setItems(snap.docs.map(d => ({ id: d.id, ...d.data() } as MenuItem)));
       setLoading(false);
     };
     fetchItems();
@@ -76,19 +79,21 @@ export default function MenuPage({ user }: { user?: UserProfile | null }) {
               className="glass rounded-3xl overflow-hidden group border border-white/5"
             >
               <div className="relative h-48">
-                <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.name} />
-                <div className="absolute top-4 left-4 glass px-3 py-1 rounded-full flex items-center gap-2">
-                  <Zap size={12} className="text-primary" />
-                  <span className="text-[10px] font-bold">{item.calories} سعرة</span>
-                </div>
+                <Link to={`/menu/${item.id}`} className="block h-full">
+                  <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.name} />
+                  <div className="absolute top-4 left-4 glass px-3 py-1 rounded-full flex items-center gap-2">
+                    <Zap size={12} className="text-primary" />
+                    <span className="text-[10px] font-bold">{item.calories} سعرة</span>
+                  </div>
+                </Link>
               </div>
               <div className="p-5 space-y-3">
                 <div className="flex justify-between items-start">
-                  <div>
+                  <Link to={`/menu/${item.id}`} className="flex-1">
                     <span className="text-[10px] text-primary font-bold uppercase tracking-widest">{item.category}</span>
-                    <h3 className="text-lg font-bold">{item.name}</h3>
-                  </div>
-                  <p className="text-xl font-black text-primary">{formatPrice(item.price, user || null)}</p>
+                    <h3 className="text-lg font-bold truncate pr-2">{item.name}</h3>
+                  </Link>
+                  <p className="text-xl font-black text-primary">{formatPrice(item.price, user || null, item.currency)}</p>
                 </div>
                 <p className="text-xs text-white/50 leading-relaxed line-clamp-2">{item.description}</p>
                 
@@ -108,13 +113,16 @@ export default function MenuPage({ user }: { user?: UserProfile | null }) {
                 </div>
 
                 <div className="flex gap-2 pt-2">
-                  <button className="flex-1 bg-primary text-black font-extrabold py-3 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-95 transition-transform">
-                    <ShoppingCart size={16} />
+                  <button 
+                    onClick={() => addToCart(item, "MENU")}
+                    className="flex-1 bg-primary text-black font-extrabold py-3 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-95 transition-transform"
+                  >
+                    <ShoppingBag size={16} />
                     أضف للطلب
                   </button>
-                  <button className="w-12 h-12 glass rounded-2xl flex items-center justify-center text-white/50">
+                  <Link to={`/menu/${item.id}`} className="w-12 h-12 glass rounded-2xl flex items-center justify-center text-white/50">
                     <Info size={16} />
-                  </button>
+                  </Link>
                 </div>
               </div>
             </motion.div>

@@ -22,18 +22,17 @@ export default function LabManagerDashboard({ user }: { user: UserProfile }) {
       // Fetch Chats
       const q = query(
         collection(db, "chats"),
-        where("expertId", "==", user.uid),
-        orderBy("updatedAt", "desc")
+        where("expertId", "==", user.uid)
       );
       const chatSnap = await getDocs(q);
       
       const chatData = await Promise.all(chatSnap.docs.map(async d => {
-          const data = d.data();
+          const data = d.data() as ChatRoom;
           const userId = data.participants.find((p: string) => p !== user.uid);
           const userSnap = await getDoc(doc(db, "users", userId!));
           return { 
-              id: d.id, 
               ...data, 
+              id: d.id, 
               userName: userSnap.exists() ? userSnap.data().name : "Unknown User",
               userImg: userSnap.exists() ? userSnap.data().profilePic : null
           };
@@ -42,7 +41,7 @@ export default function LabManagerDashboard({ user }: { user: UserProfile }) {
       // Fetch Lab Tests
       const testSnap = await getDocs(collection(db, "labs"));
       
-      setActiveChats(chatData);
+      setActiveChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
       setLabTests(testSnap.docs.map(d => ({ id: d.id, ...d.data() } as LabTest)));
       setLoading(false);
     };
@@ -115,7 +114,7 @@ export default function LabManagerDashboard({ user }: { user: UserProfile }) {
                 {labTests.map(test => (
                     <div key={test.id} className="glass rounded-2xl p-4 space-y-2 border border-white/5">
                         <h4 className="text-xs font-bold truncate tracking-tight">{test.name}</h4>
-                        <p className="text-primary font-black text-xs">{test.price} ر.س</p>
+                        <p className="text-primary font-black text-xs">{formatPrice(test.price, managerUser, test.currency)}</p>
                         <div className="flex gap-2 pt-1">
                             <button className="flex-1 py-2 bg-white/5 rounded-lg text-[8px] font-bold uppercase">تعديل</button>
                             <button className="flex-1 py-2 bg-red-500/10 text-red-500 rounded-lg text-[8px] font-bold uppercase">حذف</button>

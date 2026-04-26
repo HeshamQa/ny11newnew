@@ -4,13 +4,15 @@ import { db } from "../lib/firebase";
 import { LabTest, UserProfile, ChatRoom } from "../types";
 import { formatPrice } from "../lib/currency";
 import { motion } from "motion/react";
-import { FlaskConical, Search, Dna, Microscope, HeartPulse, ChevronLeft, MessageCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { FlaskConical, Search, Dna, Microscope, HeartPulse, ChevronLeft, MessageCircle, ShoppingBag, Info, Plus } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 export default function LabPage({ user }: { user?: UserProfile | null }) {
   const [tests, setTests] = useState<LabTest[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetch = async () => {
@@ -38,16 +40,15 @@ export default function LabPage({ user }: { user?: UserProfile | null }) {
 
       const managerId = managerSnap.docs[0].id;
 
-      // Check for existing chat
+      // Check for existing chat - using single where to avoid index requirement
       const chatsRef = collection(db, "chats");
       const q = query(
         chatsRef, 
-        where("participants", "array-contains", user.uid),
-        where("expertId", "==", managerId)
+        where("participants", "array-contains", user.uid)
       );
       const snap = await getDocs(q);
       
-      const chatRoom = snap.docs[0];
+      const chatRoom = snap.docs.find(d => d.data().expertId === managerId);
 
       if (!chatRoom) {
         const newRoom = await addDoc(collection(db, "chats"), {
@@ -115,29 +116,37 @@ export default function LabPage({ user }: { user?: UserProfile | null }) {
                 className="glass rounded-3xl p-4 flex items-center justify-between group border border-white/5"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl overflow-hidden bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors">
+                  <Link to={`/lab/${test.id}`} className="w-14 h-14 rounded-2xl overflow-hidden bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors">
                     {test.image ? (
                         <img src={test.image} className="w-full h-full object-cover" alt="" />
                     ) : (
                         <Microscope size={24} />
                     )}
-                  </div>
+                  </Link>
                   <div>
-                    <h4 className="font-bold text-sm tracking-tight">{test.name}</h4>
-                    <p className="text-[10px] text-white/40 mt-1">{test.category} • نتائج خلال 24 ساعة</p>
+                    <Link to={`/lab/${test.id}`}>
+                      <h4 className="font-bold text-sm tracking-tight">{test.name}</h4>
+                      <p className="text-[10px] text-white/40 mt-1">{test.category} • نتائج خلال 24 ساعة</p>
+                    </Link>
                   </div>
                 </div>
                 <div className="text-left flex flex-col items-end gap-2">
-                  <p className="font-black text-primary text-sm">{formatPrice(test.price, user || null)}</p>
+                  <p className="font-black text-primary text-sm">{formatPrice(test.price, user || null, test.currency)}</p>
                   <div className="flex items-center gap-2">
+                    <button 
+                        onClick={() => addToCart(test, "LAB")}
+                        className="p-2 glass text-primary rounded-xl hover:bg-primary hover:text-black transition-all"
+                    >
+                        <ShoppingBag size={14} />
+                    </button>
+                    <Link to={`/lab/${test.id}`} className="p-2 glass text-white/40 rounded-xl hover:text-white transition-colors">
+                        <Info size={14} />
+                    </Link>
                     <button 
                         onClick={startLabChat}
                         className="p-2 glass text-white/40 rounded-xl hover:text-primary transition-colors"
                     >
                         <MessageCircle size={14} />
-                    </button>
-                    <button className="text-[10px] font-bold text-primary flex items-center gap-1 uppercase tracking-tighter hover:gap-2 transition-all">
-                        احجز <ChevronLeft size={10} />
                     </button>
                   </div>
                 </div>
