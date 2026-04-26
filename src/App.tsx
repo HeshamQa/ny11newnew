@@ -18,6 +18,7 @@ import LabManagerDashboard from "./pages/LabManagerDashboard";
 import TrainerDashboard from "./pages/TrainerDashboard";
 
 import PlanPage from "./pages/PlanPage";
+import PaymentPage from "./pages/PaymentPage";
 
 // Components
 import BottomNav from "./components/BottomNav";
@@ -65,6 +66,7 @@ export default function App() {
             
             <Route path="/clinic" element={user ? <ClinicPage user={user} /> : <Navigate to="/auth" />} />
             <Route path="/plan" element={user ? <PlanPage user={user} /> : <Navigate to="/auth" />} />
+            <Route path="/payment" element={user ? <PaymentPage user={user} /> : <Navigate to="/auth" />} />
             <Route path="/chat/:id" element={user ? <ChatPage user={user} /> : <Navigate to="/auth" />} />
             <Route path="/profile" element={user ? <ProfilePage user={user} /> : <Navigate to="/auth" />} />
             
