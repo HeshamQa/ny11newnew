@@ -1,7 +1,7 @@
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 export async function getAiHealthAdvice(userPrompt: string, history: any[] = []) {
   try {
