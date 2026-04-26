@@ -18,6 +18,7 @@ import {
     Coins
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { formatPrice } from "../lib/currency";
 
 export default function ProfilePage({ user }: { user: UserProfile }) {
   const navigate = useNavigate();
@@ -33,12 +34,6 @@ export default function ProfilePage({ user }: { user: UserProfile }) {
     window.location.reload(); // Refresh to update all prices (simplest way)
   };
 
-  const displayPrice = (amount: number) => {
-    if (user.currency === "USD") {
-      return `$${(amount / 0.71).toFixed(2)}`;
-    }
-    return `${amount.toFixed(2)} د.أ`;
-  };
 
   return (
     <div className="flex flex-col flex-1 pb-32">
@@ -66,7 +61,7 @@ export default function ProfilePage({ user }: { user: UserProfile }) {
         <section className="primary-gradient p-5 rounded-3xl flex items-center justify-between shadow-xl shadow-primary/20">
           <div className="space-y-1">
             <p className="text-background-dark/60 text-[10px] font-bold uppercase tracking-widest">رصيد المحفظة</p>
-            <p className="text-3xl font-black text-background-dark">{displayPrice(user.walletBalance)}</p>
+            <p className="text-3xl font-black text-background-dark">{formatPrice(user.walletBalance, user)}</p>
           </div>
           <div className="w-12 h-12 bg-background-dark/10 rounded-2xl flex items-center justify-center text-background-dark">
             <Wallet size={24} />
