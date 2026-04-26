@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || "" });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function getAiHealthAdvice(userPrompt: string, history: any[] = []) {
   try {
@@ -31,8 +31,21 @@ export async function getAiHealthAdvice(userPrompt: string, history: any[] = [])
     });
 
     return response.text;
-  } catch (error) {
+  } catch (error: any) {
     console.error("AI Error:", error);
+    
+    // Handle quota exhaustion (429) specifically
+    const isQuotaError = 
+      error?.status === "RESOURCE_EXHAUSTED" || 
+      error?.code === 429 || 
+      error?.error?.code === 429 ||
+      (typeof error === 'string' && error.includes("429")) ||
+      (error?.message && error.message.includes("quota"));
+
+    if (isQuotaError) {
+      return "عذراً، لقد تم استهلاك كامل الحصة اليومية للمساعد الذكي. يرجى المحاولة مرة أخرى غداً.";
+    }
+
     return "عذراً، أواجه مشكلة في الاتصال حالياً. حاول مرة أخرى لاحقاً.";
   }
 }

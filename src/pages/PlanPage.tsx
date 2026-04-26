@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { UserProfile, FoodItem } from "../types";
+import { UserProfile, MenuItem } from "../types";
 import { db } from "../lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { motion, AnimatePresence } from "motion/react";
@@ -9,12 +9,12 @@ import { getAiHealthAdvice } from "../services/aiAssistant";
 export default function PlanPage({ user }: { user: UserProfile }) {
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<any>(null);
-  const [menu, setMenu] = useState<FoodItem[]>([]);
+  const [menu, setMenu] = useState<MenuItem[]>([]);
 
   useEffect(() => {
     const fetchMenu = async () => {
       const snap = await getDocs(collection(db, "menu"));
-      setMenu(snap.docs.map(d => ({ id: d.id, ...d.data() } as FoodItem)));
+      setMenu(snap.docs.map(d => ({ id: d.id, ...d.data() } as MenuItem)));
     };
     fetchMenu();
   }, []);

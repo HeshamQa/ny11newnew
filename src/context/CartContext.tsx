@@ -41,10 +41,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             }
             return [...prev, {
                 id: item.id,
-                name: item.name,
-                price: item.price,
-                currency: item.currency,
-                image: (item as any).image,
+                name: item.name || "Unknown Item",
+                price: item.price || 0,
+                currency: item.currency || "JOD",
+                image: (item as any).image || "",
                 type,
                 quantity: 1
             }];

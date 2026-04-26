@@ -28,7 +28,7 @@ export interface KnowledgeBaseItem {
   createdAt: number;
 }
 
-export interface FoodItem {
+export interface MenuItem {
   id: string;
   name: string;
   description: string;

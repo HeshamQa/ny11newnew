@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { UserProfile, FoodItem, LabTest } from "../types";
+import { UserProfile, MenuItem, LabTest } from "../types";
 import { db } from "../lib/firebase";
 import { collection, getDocs, addDoc, updateDoc, doc, deleteDoc, getDoc, setDoc, query, where } from "firebase/firestore";
 import { motion, AnimatePresence } from "motion/react";

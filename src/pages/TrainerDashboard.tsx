@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { UserProfile, ChatRoom } from "../types";
 import { formatPrice } from "../lib/currency";
 import { db } from "../lib/firebase";
-import { collection, query, where, getDocs, orderBy, doc, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, doc, getDoc, updateDoc } from "firebase/firestore";
 import { motion } from "motion/react";
 import { MessageSquare, Wallet, Trophy, User, ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -11,12 +11,18 @@ export default function TrainerDashboard({ user }: { user: UserProfile }) {
   const [activeChats, setActiveChats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [trainerUser, setTrainerUser] = useState<UserProfile>(user);
+  const [newPrice, setNewPrice] = useState<string>(user.price?.toString() || "0");
+  const [updatingPrice, setUpdatingPrice] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
       // Refresh current trainer state for wallet
       const tSnap = await getDoc(doc(db, "users", user.uid));
-      if (tSnap.exists()) setTrainerUser(tSnap.data() as UserProfile);
+      if (tSnap.exists()) {
+        const data = tSnap.data() as UserProfile;
+        setTrainerUser(data);
+        setNewPrice(data.price?.toString() || "0");
+      }
 
       const q = query(
         collection(db, "chats"),
@@ -42,6 +48,22 @@ export default function TrainerDashboard({ user }: { user: UserProfile }) {
     fetch();
   }, [user.uid]);
 
+  const handleUpdatePrice = async () => {
+    setUpdatingPrice(true);
+    try {
+      const priceVal = parseFloat(newPrice);
+      await updateDoc(doc(db, "users", user.uid), {
+        price: priceVal
+      });
+      setTrainerUser(prev => ({ ...prev, price: priceVal }));
+      alert("تم تحديث قيمة الاستشارة بنجاح");
+    } catch (err) {
+      console.error(err);
+      alert("حدث خطأ أثناء التحديث");
+    }
+    setUpdatingPrice(false);
+  };
+
   return (
     <div className="flex flex-col flex-1 pb-32">
       <header className="p-4 pt-12 space-y-4">
@@ -59,6 +81,33 @@ export default function TrainerDashboard({ user }: { user: UserProfile }) {
       </header>
 
       <main className="p-4 space-y-6">
+        {/* Set Consultation Price */}
+        <div className="glass p-6 rounded-3xl space-y-4 border border-white/5">
+          <div className="flex items-center gap-2">
+            <Wallet size={18} className="text-primary" />
+            <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-main)]">سعر الاستشارة</h3>
+          </div>
+          <div className="flex gap-3">
+            <div className="flex-1 bg-white/5 rounded-2xl px-4 py-3 border border-white/5 focus-within:border-primary/50 transition-all flex items-center gap-2">
+              <input 
+                type="number" 
+                className="bg-transparent border-none focus:ring-0 w-full font-bold text-sm" 
+                value={newPrice}
+                onChange={(e) => setNewPrice(e.target.value)}
+                placeholder="أدخل السعر"
+              />
+              <span className="text-[10px] font-black text-white/20 uppercase">{trainerUser.serviceCurrency || trainerUser.currency || "JOD"}</span>
+            </div>
+            <button 
+              onClick={handleUpdatePrice}
+              disabled={updatingPrice}
+              className="primary-gradient text-background-dark px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-50"
+            >
+              {updatingPrice ? "جاري..." : "تحديث"}
+            </button>
+          </div>
+        </div>
+
         <h2 className="text-xl font-bold tracking-tight px-1 flex items-center gap-2">
             <MessageSquare size={18} className="text-primary" /> الرسائل القادمة
         </h2>

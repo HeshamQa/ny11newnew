@@ -66,12 +66,21 @@ export default function ClinicPage({ user }: { user: UserProfile }) {
 
   return (
     <div className="flex flex-col flex-1 pb-32">
-      <header className="p-4 pt-8 space-y-2">
-        <h1 className="text-2xl font-black italic tracking-tighter">العيادة والاستشارات</h1>
-        <p className="text-xs text-white/40">تحدث مع نخبة من المدربين ومدراء المختبرات للحصول على خطة مخصصة.</p>
+      <header className="p-6 pt-12 space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="w-8 h-[1px] bg-primary" />
+          <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">ELITE DISCOVERY</h2>
+        </div>
+        <h1 className="text-4xl font-black italic tracking-tighter uppercase whitespace-pre-line text-[var(--text-main)]">
+          المدربون<br/>
+          <span className="text-primary not-italic">& الخبراء</span>
+        </h1>
+        <p className="text-xs text-[var(--text-muted)] font-medium max-w-[280px] leading-relaxed">
+          تحدث مع نخبة من المدربين ومدراء المختبرات للحصول على خطة مخصصة تعزز أدائك.
+        </p>
       </header>
 
-      <main className="p-4 space-y-8">
+      <main className="p-6 space-y-8">
         {/* AI Banner */}
         <motion.div 
             whileTap={{ scale: 0.98 }}
@@ -102,47 +111,62 @@ export default function ClinicPage({ user }: { user: UserProfile }) {
         </div>
 
         {/* Experts List */}
-        <section className="space-y-4">
-            <h2 className="text-sm font-bold px-1">الخبراء المتاحون</h2>
+        <section className="space-y-6">
+            <div className="flex items-center justify-between px-1">
+                <h2 className="text-sm font-black uppercase tracking-widest text-[var(--text-main)] italic underline decoration-primary/30 decoration-4">الطاقم المتاح</h2>
+                <span className="text-[9px] font-black text-primary uppercase bg-primary/10 px-2 py-1 rounded-md">{experts.length} متاح الآن</span>
+            </div>
+            
             {loading ? (
-                [1, 2, 3].map(i => <div key={i} className="h-28 glass rounded-3xl animate-pulse" />)
+                [1, 2, 3].map(i => <div key={i} className="h-32 glass rounded-[2.5rem] animate-pulse" />)
             ) : (
-                experts.map((expert, idx) => (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.1 }}
-                        key={expert.id}
-                        className="glass rounded-3xl p-4 flex gap-4 items-center group border border-white/5"
-                    >
-                        <div className="w-20 h-24 rounded-2xl overflow-hidden shrink-0 relative">
-                            <img src={expert.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={expert.name} />
-                            {expert.online && <div className="absolute top-2 right-2 w-3 h-3 bg-primary rounded-full border-2 border-background-dark"></div>}
-                        </div>
-                        <div className="flex-1 space-y-1">
-                            <div className="flex items-center justify-between">
-                                <span className="text-[8px] font-bold text-primary uppercase tracking-widest">
-                                    {expert.role === "TRAINER" ? "مدرب رياضي" : "مدير مختبر"}
-                                </span>
-                                <div className="flex items-center gap-1 text-amber-400">
-                                    <Star size={10} fill="currentColor" />
-                                    <span className="text-[10px] font-bold">{expert.rating}</span>
+                <div className="space-y-4">
+                    {experts.map((expert, idx) => (
+                        <motion.div
+                            initial={{ opacity: 0, y: 15 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: idx * 0.05 }}
+                            key={expert.id}
+                            className="glass rounded-[2.5rem] p-5 flex gap-5 items-center group border border-[var(--border-muted)] hover:border-primary/20 transition-all duration-500"
+                        >
+                            <div className="w-24 h-28 rounded-3xl overflow-hidden shrink-0 relative bg-white/5">
+                                <img src={expert.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={expert.name} />
+                                {expert.online && (
+                                    <div className="absolute top-3 right-3 w-3 h-3 bg-primary rounded-full border-2 border-background-dark shadow-[0_0_10px_rgba(139,198,63,0.5)]"></div>
+                                )}
+                            </div>
+                            
+                            <div className="flex-1 min-w-0 space-y-1">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-[8px] font-black text-primary uppercase tracking-[0.2em] bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
+                                        {expert.role === "TRAINER" ? "ELITE TRAINER" : "LAB DIRECTOR"}
+                                    </span>
+                                    <div className="flex items-center gap-1 text-amber-400">
+                                        <Star size={10} fill="currentColor" />
+                                        <span className="text-[10px] font-black">{expert.rating}</span>
+                                    </div>
+                                </div>
+                                
+                                <h3 className="font-black text-lg tracking-tight text-[var(--text-main)] uppercase truncate">{expert.name}</h3>
+                                <p className="text-[10px] text-[var(--text-muted)] leading-relaxed line-clamp-2 italic font-medium">"{expert.bio}"</p>
+                                
+                                <div className="flex items-center justify-between pt-3">
+                                    <div className="space-y-0.5">
+                                        <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest">قيمة الاستشارة</p>
+                                        <p className="text-sm font-black text-primary tracking-tighter">{formatPrice(expert.price, user, expert.currency)}</p>
+                                    </div>
+                                    <button 
+                                        onClick={() => startChat(expert.id, "EXPERT")}
+                                        className="w-12 h-12 primary-gradient text-background-dark rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+                                    >
+                                        <MessageCircle size={20} />
+                                    </button>
                                 </div>
                             </div>
-                            <h3 className="font-bold text-sm">{expert.name}</h3>
-                            <p className="text-[10px] text-white/40 leading-tight line-clamp-1">{expert.bio}</p>
-                            <div className="flex items-center justify-between pt-2">
-                                <p className="text-primary font-black text-xs">{formatPrice(expert.price, user, expert.currency)} <span className="text-[8px] font-normal">/ استشارة</span></p>
-                                <button 
-                                    onClick={() => startChat(expert.id, "EXPERT")}
-                                    className="bg-primary/20 text-primary p-2 rounded-xl hover:bg-primary hover:text-black transition-all active:scale-90"
-                                >
-                                    <MessageCircle size={16} />
-                                </button>
-                            </div>
-                        </div>
-                    </motion.div>
-                ))
+                        </motion.div>
+                    ))}
+                </div>
             )}
         </section>
       </main>

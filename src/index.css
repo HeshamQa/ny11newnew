@@ -1,54 +1,72 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;700;900&family=Alexandria:wght@300;400;500;700&family=Noto+Sans+Arabic:wght@300;400;500;700&display=swap');
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;700;900&family=Alexandria:wght@300;400;500;700;900&family=Noto+Sans+Arabic:wght@300;400;500;700&display=swap');
 
 @theme {
   --font-sans: "Cairo", "Alexandria", "Noto Sans Arabic", ui-sans-serif, system-ui, sans-serif;
-  --color-primary: rgb(var(--color-primary));
-  --color-primary-dark: #76a836;
-  --color-background-dark: rgb(var(--color-bg));
-  --color-card-dark: rgb(var(--color-glass));
+  --color-primary: #8bc63f;
+  --color-primary-dark: #6da131;
+  --color-background-dark: var(--bg-main);
+  --color-card-dark: var(--bg-card);
   --radius-xl: 1.5rem;
   --radius-2xl: 2rem;
+  --radius-3xl: 3.5rem;
+}
+
+:root {
+  --bg-main: #050505;
+  --bg-card: #0d0d0d;
+  --text-main: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.4);
+  --border-muted: rgba(255, 255, 255, 0.05);
+}
+
+:root.light {
+  --bg-main: #f8f9fa;
+  --bg-card: #ffffff;
+  --text-main: #000000;
+  --text-muted: rgba(0, 0, 0, 0.4);
+  --border-muted: rgba(0, 0, 0, 0.05);
 }
 
 @layer base {
-  :root {
-    --color-bg: 10 12 16; /* #0a0c10 */
-    --color-text: 255 255 255;
-    --color-primary: 139 198 63; /* #8bc63f */
-    --color-glass: 255 255 255 / 0.05;
-    --color-glass-border: 255 255 255 / 0.1;
-  }
-
-  :root.light {
-    --color-bg: 248 249 250;
-    --color-text: 26 26 26;
-    --color-glass: 0 0 0 / 0.03;
-    --color-glass-border: 0 0 0 / 0.06;
-  }
-
   body {
-    background-color: rgb(var(--color-bg));
-    color: rgb(var(--color-text));
-    @apply font-sans;
-    transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+    @apply bg-background-dark text-[var(--text-main)] font-sans selection:bg-primary/30;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+@layer components {
+  .glass {
+    @apply bg-white/[0.03] backdrop-blur-2xl border border-white/[0.05];
+  }
+  
+  .glass-dark {
+    @apply bg-black/40 backdrop-blur-3xl border border-white/[0.03];
+  }
+
+  .primary-gradient {
+    background: linear-gradient(135deg, #8bc63f 0%, #6da131 100%);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px rgba(139, 198, 63, 0.4);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
-.glass {
-  background-color: rgb(var(--color-glass));
-  backdrop-filter: blur(12px);
-  border: 1px solid rgb(var(--color-glass-border));
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
 }
 
-.primary-gradient {
-  background: linear-gradient(135deg, #8bc63f 0%, #6da131 100%);
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }

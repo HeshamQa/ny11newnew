@@ -20,6 +20,10 @@ import PlanPage from "./pages/PlanPage";
 import MenuItemPage from "./pages/MenuItemPage";
 import LabTestPage from "./pages/LabTestPage";
 import CartPage from "./pages/CartPage";
+import OrdersPage from "./pages/OrdersPage";
+import PaymentMethodsPage from "./pages/PaymentMethodsPage";
+import SettingsPage from "./pages/SettingsPage";
+import InboxPage from "./pages/InboxPage";
 
 // Components
 import BottomNav from "./components/BottomNav";
@@ -70,8 +74,8 @@ export default function App() {
   return (
     <CartProvider>
       <Router>
-        <div className="min-h-screen font-sans selection:bg-primary/30" dir="rtl">
-          <div className="max-w-md md:max-w-lg lg:max-w-xl mx-auto relative min-h-screen flex flex-col shadow-2xl bg-background-dark transition-all border-x border-white/5">
+        <div className="min-h-screen font-sans selection:bg-primary/30 text-[var(--text-main)]" dir="rtl">
+          <div className="max-w-md md:max-w-lg lg:max-w-xl mx-auto relative min-h-screen flex flex-col shadow-2xl bg-[var(--bg-main)] transition-all border-x border-[var(--border-muted)]">
             <ThemeToggle isDark={isDark} toggle={() => setIsDark(!isDark)} />
             <CartIcon />
             <Routes>
@@ -81,6 +85,10 @@ export default function App() {
               <Route path="/lab" element={<LabPage user={user} />} />
               <Route path="/lab/:id" element={<LabTestPage user={user} />} />
               <Route path="/cart" element={<CartPage user={user} />} />
+              <Route path="/inbox" element={user ? <InboxPage user={user} /> : <Navigate to="/auth" />} />
+              <Route path="/orders" element={user ? <OrdersPage user={user} /> : <Navigate to="/auth" />} />
+              <Route path="/payment-methods" element={user ? <PaymentMethodsPage user={user} /> : <Navigate to="/auth" />} />
+              <Route path="/settings" element={user ? <SettingsPage user={user} /> : <Navigate to="/auth" />} />
               <Route path="/auth" element={<AuthPage />} />
               
               <Route path="/clinic" element={user ? <ClinicPage user={user} /> : <Navigate to="/auth" />} />
