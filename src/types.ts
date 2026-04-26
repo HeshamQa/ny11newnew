@@ -14,6 +14,11 @@ export interface UserProfile {
   height?: number;
   aiInsights?: string;
   currency?: "USD" | "JOD";
+  serviceCurrency?: "USD" | "JOD";
+  rating?: number;
+  price?: number;
+  bio?: string;
+  online?: boolean;
 }
 
 export interface KnowledgeBaseItem {
@@ -28,6 +33,7 @@ export interface FoodItem {
   name: string;
   description: string;
   price: number;
+  currency?: "USD" | "JOD";
   calories: number;
   protein: number;
   carbs: number;
@@ -42,6 +48,7 @@ export interface LabTest {
   name: string;
   description: string;
   price: number;
+  currency?: "USD" | "JOD";
   category: string;
   image?: string;
 }
@@ -52,6 +59,7 @@ export interface Expert {
   role: "TRAINER" | "LAB_MANAGER";
   rating: number;
   price: number;
+  currency?: "USD" | "JOD";
   image: string;
   bio: string;
   online?: boolean;

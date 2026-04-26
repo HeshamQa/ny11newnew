@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { UserProfile } from "../types";
 import { auth, db } from "../lib/firebase";
 import { signOut } from "firebase/auth";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { doc, updateDoc } from "firebase/firestore";
 import { 
     Wallet, 
@@ -15,13 +15,17 @@ import {
     Clock,
     CreditCard,
     DollarSign,
-    Coins
+    Coins,
+    Camera,
+    Loader2
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { formatPrice } from "../lib/currency";
+import { uploadImage } from "../services/imageService";
 
 export default function ProfilePage({ user }: { user: UserProfile }) {
   const navigate = useNavigate();
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -31,25 +35,47 @@ export default function ProfilePage({ user }: { user: UserProfile }) {
   const toggleCurrency = async () => {
     const newCurrency = user.currency === "USD" ? "JOD" : "USD";
     await updateDoc(doc(db, "users", user.uid), { currency: newCurrency });
-    window.location.reload(); // Refresh to update all prices (simplest way)
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const url = await uploadImage(file);
+      await updateDoc(doc(db, "users", user.uid), { profilePic: url });
+    } catch (err) {
+      alert("فشل رفع الصورة");
+    }
+    setIsUploading(false);
+  };
 
   return (
     <div className="flex flex-col flex-1 pb-32">
       <header className="p-8 pt-12 flex flex-col items-center gap-4 bg-gradient-to-b from-primary/5 to-transparent">
-        <div className="relative">
-          <div className="w-24 h-24 rounded-3xl border-4 border-primary p-1 bg-background-dark overflow-hidden rotate-3">
-            <img 
-              src={user.profilePic || `https://ui-avatars.com/api/?name=${user.name}&background=8bc63f&color=000`} 
-              className="w-full h-full object-cover rounded-2xl -rotate-3" 
-              alt={user.name} 
-            />
+        <label className="relative cursor-pointer group">
+          <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={isUploading} />
+          <div className="w-24 h-24 rounded-3xl border-4 border-primary p-1 bg-background-dark overflow-hidden rotate-3 transition-transform group-hover:rotate-0">
+            {isUploading ? (
+              <div className="w-full h-full flex items-center justify-center bg-white/5">
+                <Loader2 className="animate-spin text-primary" size={24} />
+              </div>
+            ) : (
+              <img 
+                src={user.profilePic || `https://ui-avatars.com/api/?name=${user.name}&background=8bc63f&color=000`} 
+                className="w-full h-full object-cover rounded-2xl -rotate-3 group-hover:rotate-0 transition-transform" 
+                alt={user.name} 
+              />
+            )}
           </div>
-          <div className="absolute -bottom-2 -right-2 bg-primary text-black rounded-lg p-1 font-black text-[8px] uppercase tracking-tighter">
+          <div className="absolute inset-0 bg-black/40 rounded-3xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+            <Camera size={20} className="text-white" />
+          </div>
+          <div className="absolute -bottom-2 -right-2 bg-primary text-black rounded-lg p-1 font-black text-[8px] uppercase tracking-tighter shadow-lg z-10">
             {user.role}
           </div>
-        </div>
+        </label>
         <div className="text-center">
           <h1 className="text-2xl font-black italic tracking-tighter">{user.name}</h1>
           <p className="text-white/40 text-xs mt-1 lowercase">{user.email}</p>

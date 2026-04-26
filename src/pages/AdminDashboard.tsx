@@ -3,8 +3,10 @@ import { UserProfile, FoodItem, LabTest } from "../types";
 import { db } from "../lib/firebase";
 import { collection, getDocs, addDoc, updateDoc, doc, deleteDoc, getDoc, setDoc, query, where } from "firebase/firestore";
 import { motion, AnimatePresence } from "motion/react";
-import { Plus, Edit2, Trash2, Wallet, Users, Utensils, FlaskConical, DollarSign, ArrowLeftRight, LayoutDashboard, FileText, ChevronRight, X, Save, Brain } from "lucide-react";
+import { Plus, Edit2, Trash2, Wallet, Users, Utensils, FlaskConical, DollarSign, ArrowLeftRight, LayoutDashboard, FileText, ChevronRight, X, Save, Brain, Image as ImageIcon, Loader2 } from "lucide-react";
 import { UserRole } from "../types";
+import { uploadImage } from "../services/imageService";
+import { formatPrice } from "../lib/currency";
 
 type AdminTab = "DASHBOARD" | "MENU" | "LABS" | "USERS" | "FINANCE" | "CONTENT" | "KNOWLEDGE";
 
@@ -19,6 +21,7 @@ export default function AdminDashboard({ user }: { user: UserProfile }) {
   // Finance states
   const [transferTarget, setTransferTarget] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
+  const [transferCurrency, setTransferCurrency] = useState<"JOD" | "USD">("JOD");
 
   useEffect(() => {
     fetchTabContent();
@@ -98,6 +101,7 @@ export default function AdminDashboard({ user }: { user: UserProfile }) {
                 targetUid: transferTarget,
                 targetName: expertSnap.data().name,
                 amount: amount,
+                currency: transferCurrency,
                 type: "TRANSFER",
                 timestamp: Date.now()
             });
@@ -213,7 +217,7 @@ export default function AdminDashboard({ user }: { user: UserProfile }) {
                                             <option value="TRAINER" className="bg-background-dark">مدرب</option>
                                             <option value="LAB_MANAGER" className="bg-background-dark">مدير مختبر</option>
                                         </select>
-                                    ) : (item.category || item.type || item.amount + " ريال")}
+                                    ) : (item.category || item.type || formatPrice(item.price || 0, user, item.currency))}
                                 </p>
                             </div>
                         </div>
@@ -265,15 +269,24 @@ export default function AdminDashboard({ user }: { user: UserProfile }) {
                                 </option>
                             ))}
                         </select>
-                        <div className="relative">
-                            <input 
-                                type="number" 
-                                placeholder="المبلغ المراد تحويله" 
-                                className="w-full bg-white/20 border-none rounded-2xl placeholder:text-black/30 text-sm py-4 px-4 font-bold" 
-                                value={transferAmount}
-                                onChange={(e) => setTransferAmount(e.target.value)}
-                            />
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase opacity-40">ريال</div>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                              <input 
+                                  type="number" 
+                                  placeholder="المبلغ المراد تحويله" 
+                                  className="w-full bg-white/20 border-none rounded-2xl placeholder:text-black/30 text-sm py-4 px-4 font-bold" 
+                                  value={transferAmount}
+                                  onChange={(e) => setTransferAmount(e.target.value)}
+                              />
+                          </div>
+                          <select 
+                            value={transferCurrency}
+                            onChange={(e) => setTransferCurrency(e.target.value as any)}
+                            className="bg-white/20 border-none rounded-2xl text-[10px] font-black px-4"
+                          >
+                            <option value="JOD">JOD</option>
+                            <option value="USD">USD</option>
+                          </select>
                         </div>
                         <button 
                             onClick={handleTransfer}
@@ -292,7 +305,7 @@ export default function AdminDashboard({ user }: { user: UserProfile }) {
                                 <p className="text-xs font-bold">{pay.targetName}</p>
                                 <p className="text-[10px] text-white/30">{new Date(pay.timestamp).toLocaleDateString("ar-SA")}</p>
                             </div>
-                            <p className="text-primary font-black">+{pay.amount} ر.س</p>
+                            <p className="text-primary font-black">+{formatPrice(pay.amount, user, pay.currency)}</p>
                         </div>
                     ))}
                 </div>
@@ -305,19 +318,34 @@ export default function AdminDashboard({ user }: { user: UserProfile }) {
 
 function DetailView({ item, type, onClose, onSave }: any) {
     const [formData, setFormData] = useState(item);
+    const [isUploading, setIsUploading] = useState(false);
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        try {
+            const url = await uploadImage(file);
+            setFormData({ ...formData, image: url });
+        } catch (err) {
+            alert("فشل رفع الصورة");
+        }
+        setIsUploading(false);
+    };
 
     return (
         <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/80 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
         >
             <motion.div 
                 initial={{ y: 100 }}
                 animate={{ y: 0 }}
                 exit={{ y: 100 }}
-                className="glass w-full max-w-lg rounded-[3rem] p-8 space-y-6 border border-white/10 relative"
+                className="glass w-full max-w-lg rounded-[3rem] p-8 space-y-6 border border-white/10 relative my-auto shadow-2xl"
             >
                 <button onClick={onClose} className="absolute right-6 top-6 w-10 h-10 rounded-full glass flex items-center justify-center text-white/40 hover:text-white transition-colors">
                     <X size={20} />
@@ -329,14 +357,60 @@ function DetailView({ item, type, onClose, onSave }: any) {
                 </div>
 
                 <div className="space-y-4 max-h-[60vh] overflow-y-auto no-scrollbar pr-2">
-                    <InputField label="الاسم / العنوان" value={formData.name || formData.title || ""} onChange={(v) => setFormData({...formData, name: v, title: v})} />
+                    <InputField label="الاسم / العنوان" value={formData.name || formData.title || ""} onChange={(v: any) => setFormData({...formData, name: v, title: v})} />
                     
+                    {["MENU", "LABS"].includes(type) && (
+                        <div className="space-y-4">
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <InputField label="السعر" value={formData.price || ""} type="number" onChange={(v: any) => setFormData({...formData, price: parseFloat(v)})} />
+                                </div>
+                                <div className="flex-1">
+                                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] px-2">العملة</label>
+                                    <div className="glass rounded-2xl px-5 border border-white/5 mt-2">
+                                        <select 
+                                            value={formData.currency || "JOD"} 
+                                            onChange={(e) => setFormData({...formData, currency: e.target.value})}
+                                            className="bg-transparent border-none focus:ring-0 text-sm w-full py-4 text-white"
+                                        >
+                                            <option value="JOD" className="bg-background-dark">دينار أردني (JOD)</option>
+                                            <option value="USD" className="bg-background-dark">دولار أمريكي (USD)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] px-2">الصورة</label>
+                            <label className="glass rounded-3xl p-6 border-2 border-dashed border-white/10 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-all group overflow-hidden relative min-h-[120px]">
+                                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={isUploading} />
+                                {isUploading ? (
+                                    <Loader2 className="animate-spin text-primary" size={32} />
+                                ) : formData.image ? (
+                                    <img src={formData.image} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity" alt="" />
+                                ) : (
+                                    <>
+                                        <ImageIcon className="text-white/20 mb-2" size={32} />
+                                        <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">اضغط لرفع صورة</span>
+                                    </>
+                                )}
+                            </label>
+                            <InputField label="رابط الصورة (اختياري)" value={formData.image || ""} onChange={(v: any) => setFormData({...formData, image: v})} />
+                        </div>
+                    )}
+
                     {type === "MENU" && (
                         <>
-                            <InputField label="السعر" value={formData.price || ""} type="number" onChange={(v) => setFormData({...formData, price: v})} />
-                            <InputField label="السعرات" value={formData.calories || ""} type="number" onChange={(v) => setFormData({...formData, calories: v})} />
-                            <InputField label="رابط الصورة" value={formData.image || ""} onChange={(v) => setFormData({...formData, image: v})} />
+                            <InputField label="السعرات" value={formData.calories || ""} type="number" onChange={(v: any) => setFormData({...formData, calories: parseInt(v)})} />
+                            <div className="grid grid-cols-3 gap-2">
+                                <InputField label="بروتين" value={formData.protein || ""} type="number" onChange={(v: any) => setFormData({...formData, protein: parseFloat(v)})} />
+                                <InputField label="كارب" value={formData.carbs || ""} type="number" onChange={(v: any) => setFormData({...formData, carbs: parseFloat(v)})} />
+                                <InputField label="دهون" value={formData.fats || ""} type="number" onChange={(v: any) => setFormData({...formData, fats: parseFloat(v)})} />
+                            </div>
                         </>
+                    )}
+
+                    {type === "LABS" && (
+                        <InputField label="التصنيف" value={formData.category || ""} onChange={(v: any) => setFormData({...formData, category: v})} />
                     )}
 
                     {type === "CONTENT" && (
@@ -355,8 +429,47 @@ function DetailView({ item, type, onClose, onSave }: any) {
 
                     {type === "USERS" && (
                         <>
-                            <InputField label="الدور (USER/TRAINER/ADMIN)" value={formData.role || "USER"} onChange={(v) => setFormData({...formData, role: v})} />
-                            <InputField label="الرصيد" value={formData.walletBalance || 0} type="number" onChange={(v) => setFormData({...formData, walletBalance: parseFloat(v)})} />
+                            <InputField label="الدور (USER/TRAINER/ADMIN/LAB_MANAGER)" value={formData.role || "USER"} onChange={(v: any) => setFormData({...formData, role: v})} />
+                            
+                            {["TRAINER", "LAB_MANAGER"].includes(formData.role) && (
+                                <div className="flex gap-4">
+                                    <div className="flex-1">
+                                        <InputField label="سجل الاستشارة" value={formData.price || 0} type="number" onChange={(v: any) => setFormData({...formData, price: parseFloat(v)})} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] px-2">عملة الخدمة</label>
+                                        <div className="glass rounded-2xl px-5 border border-white/5 mt-2">
+                                            <select 
+                                                value={formData.serviceCurrency || "JOD"} 
+                                                onChange={(e) => setFormData({...formData, serviceCurrency: e.target.value})}
+                                                className="bg-transparent border-none focus:ring-0 text-sm w-full py-4 text-white"
+                                            >
+                                                <option value="JOD" className="bg-background-dark">JOD</option>
+                                                <option value="USD" className="bg-background-dark">USD</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <InputField label="الرصيد" value={formData.walletBalance || 0} type="number" onChange={(v: any) => setFormData({...formData, walletBalance: parseFloat(v)})} />
+                                </div>
+                                <div className="flex-1">
+                                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] px-2">عملة الحساب</label>
+                                    <div className="glass rounded-2xl px-5 border border-white/5 mt-2">
+                                        <select 
+                                            value={formData.currency || "JOD"} 
+                                            onChange={(e) => setFormData({...formData, currency: e.target.value})}
+                                            className="bg-transparent border-none focus:ring-0 text-sm w-full py-4 text-white"
+                                        >
+                                            <option value="JOD" className="bg-background-dark">JOD</option>
+                                            <option value="USD" className="bg-background-dark">USD</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                         </>
                     )}
                 </div>

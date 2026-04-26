@@ -14,8 +14,22 @@ export default function ClinicPage({ user }: { user: UserProfile }) {
 
   useEffect(() => {
     const fetch = async () => {
-      const snap = await getDocs(collection(db, "experts"));
-      setExperts(snap.docs.map(d => ({ id: d.id, ...d.data() } as Expert)));
+      const q = query(collection(db, "users"), where("role", "in", ["TRAINER", "LAB_MANAGER"]));
+      const snap = await getDocs(q);
+      setExperts(snap.docs.map(d => {
+          const data = d.data();
+          return { 
+            id: d.id, 
+            ...data,
+            image: data.profilePic || data.image || "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=200",
+            role: data.role === "TRAINER" ? "TRAINER" : "LAB_MANAGER",
+            rating: data.rating || 5.0,
+            price: data.price || 0,
+            currency: data.serviceCurrency || data.currency || "JOD",
+            bio: data.bio || "خبير متخصص في الرعاية الصحية",
+            online: data.online || false
+          } as Expert;
+      }));
       setLoading(false);
     };
     fetch();
@@ -118,7 +132,7 @@ export default function ClinicPage({ user }: { user: UserProfile }) {
                             <h3 className="font-bold text-sm">{expert.name}</h3>
                             <p className="text-[10px] text-white/40 leading-tight line-clamp-1">{expert.bio}</p>
                             <div className="flex items-center justify-between pt-2">
-                                <p className="text-primary font-black text-xs">{formatPrice(expert.price, user)} <span className="text-[8px] font-normal">/ استشارة</span></p>
+                                <p className="text-primary font-black text-xs">{formatPrice(expert.price, user, expert.currency)} <span className="text-[8px] font-normal">/ استشارة</span></p>
                                 <button 
                                     onClick={() => startChat(expert.id, "EXPERT")}
                                     className="bg-primary/20 text-primary p-2 rounded-xl hover:bg-primary hover:text-black transition-all active:scale-90"
