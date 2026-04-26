@@ -24,6 +24,7 @@ import OrdersPage from "./pages/OrdersPage";
 import PaymentMethodsPage from "./pages/PaymentMethodsPage";
 import SettingsPage from "./pages/SettingsPage";
 import InboxPage from "./pages/InboxPage";
+import PaymentPage from "./pages/PaymentPage";
 
 // Components
 import BottomNav from "./components/BottomNav";
@@ -88,6 +89,7 @@ export default function App() {
               <Route path="/inbox" element={user ? <InboxPage user={user} /> : <Navigate to="/auth" />} />
               <Route path="/orders" element={user ? <OrdersPage user={user} /> : <Navigate to="/auth" />} />
               <Route path="/payment-methods" element={user ? <PaymentMethodsPage user={user} /> : <Navigate to="/auth" />} />
+              <Route path="/payment" element={user ? <PaymentPage user={user} /> : <Navigate to="/auth" />} />
               <Route path="/settings" element={user ? <SettingsPage user={user} /> : <Navigate to="/auth" />} />
               <Route path="/auth" element={<AuthPage />} />
               
