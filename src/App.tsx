@@ -5,7 +5,7 @@ import { auth, db } from "./lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { UserProfile } from "./types";
 
-// Pages
+// Pages. 
 import HomePage from "./pages/HomePage";
 import MenuPage from "./pages/MenuPage";
 import LabPage from "./pages/LabPage";
