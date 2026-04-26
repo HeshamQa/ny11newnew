@@ -60,6 +60,16 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Mastercard Hosted Session Iframes */
+  iframe[id^="hpf-"] {
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    z-index: 50 !important;
+    position: relative !important;
+    pointer-events: auto !important;
+  }
 }
 
 @keyframes float {

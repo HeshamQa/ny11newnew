@@ -13,61 +13,12 @@ export default function CartPage({ user }: { user: UserProfile | null }) {
     const { items, total, removeFromCart, updateQuantity, clearCart } = useCart();
     const [loading, setLoading] = useState(false);
 
-    const handleCheckout = async () => {
+    const handleCheckout = () => {
         if (!user) {
             navigate("/auth");
             return;
         }
-
-        if (user.walletBalance < total) {
-            alert("رصيد المحفظة غير كافٍ!");
-            return;
-        }
-
-        setLoading(true);
-        try {
-            // Deduct from wallet
-            await updateDoc(doc(db, "users", user.uid), {
-                walletBalance: increment(-total)
-            });
-
-            // Create Order
-            const sanitizedItems = items.map(item => ({
-                id: item.id,
-                name: item.name,
-                price: item.price,
-                currency: item.currency || "JOD",
-                image: item.image || null,
-                type: item.type,
-                quantity: item.quantity
-            }));
-
-            await addDoc(collection(db, "orders"), {
-                userId: user.uid,
-                userName: user.name,
-                items: sanitizedItems,
-                total: total,
-                timestamp: Date.now(),
-                status: "PAID"
-            });
-
-            // Create Transaction Record
-            await addDoc(collection(db, "transactions"), {
-                userId: user.uid,
-                amount: total,
-                type: "PURCHASE",
-                description: `شراء ${items.length} منتجات`,
-                timestamp: Date.now()
-            });
-
-            clearCart();
-            alert("تمت عملية الشراء بنجاح!");
-            navigate("/");
-        } catch (error) {
-            console.error("Checkout error:", error);
-            alert("فشلت عملية الدفع");
-        }
-        setLoading(false);
+        navigate("/payment");
     };
 
     if (items.length === 0) {
