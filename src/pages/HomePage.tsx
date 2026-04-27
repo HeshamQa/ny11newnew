@@ -8,6 +8,7 @@ import { db } from "../lib/firebase";
 import { Link, useNavigate } from "react-router-dom";
 import { getAiHealthAdvice } from "../services/aiAssistant";
 
+import { t } from "../lib/translations";
 import { formatPrice } from "../lib/currency";
 
 export default function HomePage({ user }: { user: UserProfile | null }) {
@@ -185,8 +186,8 @@ export default function HomePage({ user }: { user: UserProfile | null }) {
                     </div>
                   </div>
                   <div className="px-4">
-                    <span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">{item.category}</span>
-                    <h4 className="text-lg font-black tracking-tighter uppercase truncate text-[var(--text-main)]">{item.name}</h4>
+                    <span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">{t(item.category)}</span>
+                    <h4 className="text-lg font-black tracking-tighter uppercase truncate text-[var(--text-main)]">{t(item.name)}</h4>
                   </div>
                 </Link>
               </motion.div>

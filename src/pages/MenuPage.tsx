@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 import { Search, Filter, ShoppingBag, Info, Activity, Zap, Plus, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { t } from "../lib/translations";
 
 export default function MenuPage({ user }: { user?: UserProfile | null }) {
   const [items, setItems] = useState<MenuItem[]>([]);
@@ -32,10 +33,12 @@ export default function MenuPage({ user }: { user?: UserProfile | null }) {
     { id: "مشروبات", ar: "مشروبات", en: "DRINKS" }
   ];
 
-  const filtered = items.filter(item => 
-    (selectedCategory === "ALL" || item.category === selectedCategory) &&
-    (item.name.includes(search) || (item.description && item.description.includes(search)))
-  );
+  const filtered = items.filter(item => {
+    const name = t(item.name);
+    const desc = t(item.description);
+    return (selectedCategory === "ALL" || item.category === selectedCategory) &&
+    (name.includes(search) || (desc && desc.includes(search)));
+  });
 
   return (
     <div className="flex flex-col flex-1 pb-40 overflow-x-hidden">
@@ -96,7 +99,7 @@ export default function MenuPage({ user }: { user?: UserProfile | null }) {
             >
               <div className="glass rounded-[3.5rem] overflow-hidden border-white/[0.03] shadow-2xl relative">
                 <Link to={`/menu/${item.id}`} className="block relative h-64 overflow-hidden">
-                  <img src={item.image} className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000" alt={item.name} />
+                  <img src={item.image} className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000" alt={t(item.name)} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   
                   <div className="absolute top-6 left-6 glass px-5 py-2 rounded-2xl flex items-center gap-3">
@@ -109,8 +112,8 @@ export default function MenuPage({ user }: { user?: UserProfile | null }) {
                   <div className="flex justify-between items-start">
                     <Link to={`/menu/${item.id}`} className="flex-1 space-y-1">
                       <span className="text-[10px] text-primary font-black uppercase tracking-[0.2em]">{item.category}</span>
-                      <h3 className="text-xl font-black tracking-tighter uppercase mb-1 text-[var(--text-main)]">{item.name}</h3>
-                      <p className="text-xs text-[var(--text-muted)] font-medium leading-relaxed line-clamp-1">{item.description}</p>
+                      <h3 className="text-xl font-black tracking-tighter uppercase mb-1 text-[var(--text-main)]">{t(item.name)}</h3>
+                      <p className="text-xs text-[var(--text-muted)] font-medium leading-relaxed line-clamp-1">{t(item.description)}</p>
                     </Link>
                   </div>
 

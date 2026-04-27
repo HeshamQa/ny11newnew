@@ -8,6 +8,8 @@ import { UserRole } from "../types";
 import { uploadImage } from "../services/imageService";
 import { formatPrice } from "../lib/currency";
 
+import { t } from "../lib/translations";
+
 type AdminTab = "DASHBOARD" | "MENU" | "LABS" | "USERS" | "FINANCE" | "CONTENT" | "KNOWLEDGE";
 
 export default function AdminDashboard({ user }: { user: UserProfile }) {
@@ -204,7 +206,7 @@ export default function AdminDashboard({ user }: { user: UserProfile }) {
                                 )}
                             </div>
                             <div>
-                                <h4 className="text-xs font-black truncate max-w-[150px]">{item.name || item.email || item.title || item.question}</h4>
+                                <h4 className="text-xs font-black truncate max-w-[150px]">{t(item.name || item.email || item.title || item.question)}</h4>
                                 <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
                                     {tab === "KNOWLEDGE" ? "سؤال وجواب للمساعد" : tab === "USERS" ? (
                                         <select 
@@ -317,7 +319,11 @@ export default function AdminDashboard({ user }: { user: UserProfile }) {
 }
 
 function DetailView({ item, type, onClose, onSave }: any) {
-    const [formData, setFormData] = useState(item);
+    const [formData, setFormData] = useState({
+        ...item,
+        name: typeof item.name === 'object' ? item.name : { ar: item.name || "", en: "" },
+        description: typeof item.description === 'object' ? item.description : { ar: item.description || "", en: "" }
+    });
     const [isUploading, setIsUploading] = useState(false);
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -357,7 +363,10 @@ function DetailView({ item, type, onClose, onSave }: any) {
                 </div>
 
                 <div className="space-y-4 max-h-[60vh] overflow-y-auto no-scrollbar pr-2">
-                    <InputField label="الاسم / العنوان" value={formData.name || formData.title || ""} onChange={(v: any) => setFormData({...formData, name: v, title: v})} />
+                    <div className="grid grid-cols-2 gap-4">
+                        <InputField label="الاسم (عربي)" value={formData.name?.ar || ""} onChange={(v: any) => setFormData({...formData, name: { ...formData.name, ar: v }})} />
+                        <InputField label="Name (EN)" value={formData.name?.en || ""} onChange={(v: any) => setFormData({...formData, name: { ...formData.name, en: v }})} />
+                    </div>
                     
                     {["MENU", "LABS"].includes(type) && (
                         <div className="space-y-4">
@@ -415,7 +424,10 @@ function DetailView({ item, type, onClose, onSave }: any) {
 
                     {type === "CONTENT" && (
                         <>
-                            <InputField label="الوصف / المحتوى" value={formData.description || ""} isTextArea onChange={(v) => setFormData({...formData, description: v})} />
+                            <div className="space-y-4">
+                                <InputField label="الوصف (عربي)" value={formData.description?.ar || ""} isTextArea onChange={(v) => setFormData({...formData, description: { ...formData.description, ar: v }})} />
+                                <InputField label="Description (EN)" value={formData.description?.en || ""} isTextArea onChange={(v) => setFormData({...formData, description: { ...formData.description, en: v }})} />
+                            </div>
                             <InputField label="النوع (advice/promo)" value={formData.type || "advice"} onChange={(v) => setFormData({...formData, type: v})} />
                         </>
                     )}

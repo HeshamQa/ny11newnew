@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 import { FlaskConical, Search, Dna, Microscope, HeartPulse, ChevronLeft, MessageCircle, ShoppingBag, Info, Plus } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { t } from "../lib/translations";
 
 export default function LabPage({ user }: { user?: UserProfile | null }) {
   const [tests, setTests] = useState<LabTest[]>([]);
@@ -125,7 +126,7 @@ export default function LabPage({ user }: { user?: UserProfile | null }) {
                   </Link>
                   <div>
                     <Link to={`/lab/${test.id}`}>
-                      <h4 className="font-bold text-sm tracking-tight">{test.name}</h4>
+                      <h4 className="font-bold text-sm tracking-tight">{t(test.name)}</h4>
                       <p className="text-[10px] text-white/40 mt-1">{test.category} • نتائج خلال 24 ساعة</p>
                     </Link>
                   </div>

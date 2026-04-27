@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 import { ArrowRight, Share2, Info, ShoppingBag, FlaskConical, FileText, CheckCircle2, ShieldCheck, Clock } from "lucide-react";
 import { formatPrice } from "../lib/currency";
 import { useCart } from "../context/CartContext";
+import { t } from "../lib/translations";
 
 export default function LabTestPage({ user }: { user: UserProfile | null }) {
     const { id } = useParams();
@@ -44,7 +45,7 @@ export default function LabTestPage({ user }: { user: UserProfile | null }) {
                 </button>
                 <div className="text-center">
                     <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">{test.category}</span>
-                    <h1 className="text-xl font-black italic tracking-tighter uppercase whitespace-pre-line">{test.name}</h1>
+                    <h1 className="text-xl font-black italic tracking-tighter uppercase whitespace-pre-line">{t(test.name)}</h1>
                 </div>
                 <button onClick={handleShare} className="w-12 h-12 glass rounded-2xl flex items-center justify-center text-white/40 hover:text-white transition-colors">
                     <Share2 size={20} />
@@ -64,7 +65,7 @@ export default function LabTestPage({ user }: { user: UserProfile | null }) {
                         </div>
                       </div>
                       <p className="text-white/60 leading-relaxed text-sm">
-                          {test.description}
+                          {t(test.description)}
                       </p>
                     </div>
                 </div>

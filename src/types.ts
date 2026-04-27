@@ -30,8 +30,8 @@ export interface KnowledgeBaseItem {
 
 export interface MenuItem {
   id: string;
-  name: string;
-  description: string;
+  name: string | { ar: string; en: string };
+  description: string | { ar: string; en: string };
   price: number;
   currency?: "USD" | "JOD";
   calories: number;
@@ -45,8 +45,8 @@ export interface MenuItem {
 
 export interface LabTest {
   id: string;
-  name: string;
-  description: string;
+  name: string | { ar: string; en: string };
+  description: string | { ar: string; en: string };
   price: number;
   currency?: "USD" | "JOD";
   category: string;

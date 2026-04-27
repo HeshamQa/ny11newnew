@@ -1,7 +1,9 @@
-import { UserProfile } from "../types";
+import { t } from "./translations";
 
 export const formatPrice = (amount: any, user: UserProfile | null, itemCurrency?: "USD" | "JOD") => {
-    const numAmount = Number(amount) || 0;
+    // Handle localized amount if it's an object
+    const rawAmount = typeof amount === 'object' ? t(amount) : amount;
+    const numAmount = Number(rawAmount) || 0;
     const itemCur = itemCurrency || "JOD";
     const userCur = user?.currency || "JOD";
   

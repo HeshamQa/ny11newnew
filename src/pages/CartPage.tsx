@@ -7,6 +7,7 @@ import { useCart } from "../context/CartContext";
 import { formatPrice } from "../lib/currency";
 import { db } from "../lib/firebase";
 import { collection, addDoc, doc, updateDoc, increment } from "firebase/firestore";
+import { t } from "../lib/translations";
 
 export default function CartPage({ user }: { user: UserProfile | null }) {
     const navigate = useNavigate();
@@ -66,7 +67,7 @@ export default function CartPage({ user }: { user: UserProfile | null }) {
                         >
                             <div className="w-20 h-20 rounded-2xl overflow-hidden glass shrink-0">
                                 {item.image ? (
-                                    <img src={item.image} className="w-full h-full object-cover" alt={item.name} />
+                                    <img src={item.image} className="w-full h-full object-cover" alt={t(item.name)} />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary">
                                         <ShoppingBag size={24} />
@@ -75,7 +76,7 @@ export default function CartPage({ user }: { user: UserProfile | null }) {
                             </div>
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
-                                    <h3 className="font-bold text-sm truncate pr-2 text-[var(--text-main)]">{item.name}</h3>
+                                    <h3 className="font-bold text-sm truncate pr-2 text-[var(--text-main)]">{t(item.name)}</h3>
                                     <button onClick={() => removeFromCart(item.id)} className="text-[var(--text-muted)] hover:text-red-500 transition-colors">
                                         <X size={16} />
                                     </button>
