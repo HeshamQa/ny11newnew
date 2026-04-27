@@ -11,7 +11,7 @@ export default function ClinicPage({ user }: { user: UserProfile }) {
   const [experts, setExperts] = useState<Expert[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
+  // Use
   useEffect(() => {
     const fetch = async () => {
       const q = query(collection(db, "users"), where("role", "in", ["TRAINER", "LAB_MANAGER"]));
